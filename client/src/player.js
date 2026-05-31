@@ -41,9 +41,23 @@ export class DashPlayer {
       this.mediaSource.addEventListener('sourceopen', resolve, { once: true }),
     );
 
-    // The video track defines the timeline; load audio alongside it.
-    const videoDurations = await this.#loadTrack(this.plan.videoRep, 'video');
-    await this.#loadTrack(this.plan.audioRep, 'audio');
+    // Add both source buffers up front, while the MediaSource is freshly open
+    // and before any data flows. Adding the second one later (once the video
+    // buffer is already active) makes Chrome reject it with a "reached the
+    // limit of SourceBuffer objects" error.
+    const videoCodec = this.#codec(this.plan.videoRep);
+    const audioCodec = this.#codec(this.plan.audioRep);
+    for (const codec of [videoCodec, audioCodec]) {
+      if (!MediaSource.isTypeSupported(codec)) {
+        throw new Error(`codec not supported by this browser: ${codec}`);
+      }
+    }
+    this.videoQueue = new BufferQueue(this.mediaSource, videoCodec);
+    this.audioQueue = new BufferQueue(this.mediaSource, audioCodec);
+
+    // The video track defines the timeline; fill audio alongside it.
+    const videoDurations = await this.#fillTrack(this.plan.videoRep, this.videoQueue);
+    await this.#fillTrack(this.plan.audioRep, this.audioQueue);
 
     await Promise.all([this.videoQueue.whenIdle(), this.audioQueue.whenIdle()]);
     try {
@@ -90,18 +104,18 @@ export class DashPlayer {
 
   // -- internals ------------------------------------------------------------
 
-  // Downloads init + a run of subsegments for one representation. Returns the
-  // per-subsegment durations (used to build the timeline).
-  async #loadTrack(rep, kind) {
+  // Builds the MSE codec string for a representation.
+  #codec(rep) {
+    return `${rep.mimeType};codecs="${rep.$.codecs}"`;
+  }
+
+  // Downloads init + a run of subsegments for one representation into its queue.
+  // Returns the per-subsegment durations (used to build the timeline).
+  async #fillTrack(rep, queue) {
     const url = rep.BaseURL[0]._;
     const indexRange = rep.SegmentBase[0].$.indexRange;
     const initRange = rep.SegmentBase[0].Initialization[0].$.range;
     const indexEnd = parseInt(indexRange.split('-')[1], 10);
-    const mimeCodec = `${rep.mimeType};codecs="${rep.$.codecs}"`;
-
-    const queue = new BufferQueue(this.mediaSource, mimeCodec);
-    if (kind === 'video') this.videoQueue = queue;
-    else this.audioQueue = queue;
 
     queue.append(new Uint8Array(await fetchRange(url, initRange)));
     const { entries } = parseSidx(await fetchRange(url, indexRange));
