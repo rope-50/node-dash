@@ -3,13 +3,33 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Node Dash: MPEG-DASH player</title>
+    <title>Dash Player: MPEG-DASH</title>
   </head>
   <body>
     <main id="app">
-      <h1>Node Dash</h1>
+      <h1>Dash Player</h1>
       <p id="status">Loading video...</p>
       <div id="player"></div>
+
+      <section class="about">
+        <h2>What you are watching</h2>
+        <p>
+          This is a from-scratch DASH player: no video library, just the browser's
+          Media Source Extensions. Here is what happens as it plays:
+        </p>
+        <ol>
+          <li>It reads a <strong>DASH manifest</strong> that lists the available video qualities.</li>
+          <li>It downloads the video and audio in small <strong>chunks</strong>, the same way YouTube does.</li>
+          <li id="step-switch">
+            Partway through it <strong>switches to a higher quality</strong> on the
+            fly, so the picture visibly gets sharper. Watch the badge (top-right).
+          </li>
+          <li id="step-buffer">
+            It also <strong>pauses briefly to simulate buffering</strong>, with a
+            loading bar across the top.
+          </li>
+        </ol>
+      </section>
     </main>
     <script type="module" src="/src/main.js"></script>
   </body>

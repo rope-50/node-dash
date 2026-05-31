@@ -89,3 +89,74 @@ describe('normalizeManifest', () => {
     expect(normalizeManifest(noIndex, SRC)).toEqual([]);
   });
 });
+
+const TEMPLATE_SRC = 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd';
+
+// A parsed MPD (xml2js shape) mirroring Big Buck Bunny: an MPD-level BaseURL,
+// a SegmentTemplate on each AdaptationSet, and numbered segments.
+const TEMPLATE_MPD = {
+  MPD: {
+    BaseURL: ['./'],
+    Period: [
+      {
+        AdaptationSet: [
+          {
+            $: { mimeType: 'video/mp4' },
+            SegmentTemplate: [
+              {
+                $: {
+                  duration: '120',
+                  timescale: '30',
+                  startNumber: '1',
+                  media: '$RepresentationID$/$RepresentationID$_$Number$.m4v',
+                  initialization: '$RepresentationID$/$RepresentationID$_0.m4v',
+                },
+              },
+            ],
+            Representation: [
+              { $: { id: 'bbb_320x180', codecs: 'avc1.64000d', width: '320', height: '180', bandwidth: '200000' } },
+              { $: { id: 'bbb_1920x1080', codecs: 'avc1.640028', width: '1920', height: '1080', bandwidth: '8000000' } },
+            ],
+          },
+          {
+            $: { mimeType: 'audio/mp4' },
+            SegmentTemplate: [
+              { $: { duration: '120', timescale: '30', startNumber: '1', media: 'audio/$Number$.m4a', initialization: 'audio/0.m4a' } },
+            ],
+            Representation: [{ $: { id: 'audio', codecs: 'mp4a.40.2', bandwidth: '128000' } }],
+          },
+        ],
+      },
+    ],
+  },
+};
+
+describe('normalizeManifest (SegmentTemplate)', () => {
+  const reps = normalizeManifest(TEMPLATE_MPD, TEMPLATE_SRC);
+
+  it('returns each representation with a template, no SegmentBase', () => {
+    expect(reps.map((r) => r.$.id)).toEqual(['bbb_320x180', 'bbb_1920x1080', 'audio']);
+    expect(reps[0].SegmentBase).toBeUndefined();
+    expect(reps[0].template).toBeDefined();
+  });
+
+  it('expands numbered segments with proxied absolute URLs and durations', () => {
+    const t = reps[0].template;
+    expect(t.segments).toHaveLength(8); // TEMPLATE_SEGMENTS
+    expect(t.segments[0].duration).toBe(4); // 120 / 30
+
+    const initUpstream = decodeURIComponent(t.init.split('url=')[1]);
+    expect(initUpstream).toBe(
+      'https://dash.akamaized.net/akamai/bbb_30fps/bbb_320x180/bbb_320x180_0.m4v',
+    );
+    const seg0Upstream = decodeURIComponent(t.segments[0].url.split('url=')[1]);
+    expect(seg0Upstream).toBe(
+      'https://dash.akamaized.net/akamai/bbb_30fps/bbb_320x180/bbb_320x180_1.m4v',
+    );
+  });
+
+  it('carries codecs and mimeType', () => {
+    expect(reps[1].$.codecs).toBe('avc1.640028');
+    expect(reps[2].mimeType).toBe('audio/mp4');
+  });
+});

@@ -48,6 +48,26 @@ h1 {
   background: #000;
 }
 
+/* Fullscreen: let the video fill the screen (letterboxed), controls at bottom */
+.player:fullscreen,
+.player:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+.player:fullscreen video,
+.player:-webkit-full-screen video {
+  flex: 1 1 auto;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  object-fit: contain;
+}
+
 /* Overlay with media information */
 .player .info {
   position: absolute;
@@ -64,6 +84,42 @@ h1 {
 
 .player .info span {
   display: block;
+}
+
+/* Prominent current-resolution badge */
+.player .quality-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.player .quality-badge.flash {
+  animation: quality-flash 1.1s ease;
+}
+
+@keyframes quality-flash {
+  0% {
+    transform: scale(1);
+    background: var(--accent);
+  }
+  25% {
+    transform: scale(1.5);
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(39, 128, 227, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    background: rgba(0, 0, 0, 0.6);
+  }
 }
 
 /* Buffering bar across the top */
@@ -134,4 +190,39 @@ h1 {
   color: #c7ccd4;
   min-width: 48px;
   text-align: center;
+}
+
+/* Explainer */
+.about {
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: #15171f;
+  border: 1px solid #232634;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #c7ccd4;
+}
+
+.about h2 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  color: var(--fg);
+}
+
+.about p {
+  margin: 0 0 10px;
+}
+
+.about ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.about li {
+  margin-bottom: 6px;
+}
+
+.about strong {
+  color: var(--fg);
 }

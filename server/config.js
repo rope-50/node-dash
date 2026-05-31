@@ -1,14 +1,16 @@
 /**
  * Runtime configuration.
  *
- * The player works with any MPEG-DASH stream that uses the on-demand
- * `SegmentBase` + `sidx` addressing model (a single file per representation with
- * byte-range requests). The default below is a public DASH-IF test vector.
+ * The player supports both DASH addressing models: on-demand `SegmentBase`
+ * (single file per representation, byte-range requests) and `SegmentTemplate`
+ * (numbered segment files). The default below uses SegmentTemplate.
  */
 
 // Default manifest used when the client requests /dash/manifest with no src.
+// Big Buck Bunny: bright content with qualities from 180p up to 1080p+, so the
+// low-to-high quality switch is dramatic. Uses the SegmentTemplate model.
 export const DEFAULT_MANIFEST =
-  'https://dash.akamaized.net/dash264/TestCases/2a/qualcomm/1/MultiResMPEG2.mpd';
+  'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd';
 
 // Hosts the server is allowed to fetch from. This keeps the media proxy from
 // becoming an open relay (SSRF): only these origins can be requested.

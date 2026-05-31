@@ -15,3 +15,18 @@ export async function fetchRange(url, range) {
   }
   return res.arrayBuffer();
 }
+
+/**
+ * Fetches a whole resource as an ArrayBuffer (used for SegmentTemplate streams,
+ * where each segment is its own file rather than a byte range).
+ *
+ * @param {string} url - Segment URL (already pointing at the server proxy).
+ * @returns {Promise<ArrayBuffer>}
+ */
+export async function fetchWhole(url) {
+  const res = await fetch(url);
+  if (!res.ok && res.status !== 206) {
+    throw new Error(`segment request failed (${res.status})`);
+  }
+  return res.arrayBuffer();
+}
