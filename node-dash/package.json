@@ -1,9 +1,0 @@
-{
-  "name": "dash",
-  "version": "0.0.1",
-  "main" : "./node-dash.js",
-  "dependencies" : {
-  	"xml2js" : "*",
-  	"request" : "*"
-  } 
-}

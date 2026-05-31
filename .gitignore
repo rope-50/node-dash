@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Test / coverage output
+coverage/
+.vitest/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS / tooling
+.vscode/
+.idea/
+.DS_Store
+.claude/

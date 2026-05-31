@@ -1,5 +1,7 @@
 DashClient = function(videoData, container, callback){
-  this.videoID    = videoData.url.split('v=')[1];
+  // Endpoint that returns the normalized representation list for this stream.
+  // (Decoupled from the original YouTube-specific video id.)
+  this.manifestUrl = videoData.manifest;
   this.buildHTML(container);
   this.container = container;
   this.callback = callback;
@@ -506,7 +508,7 @@ DashClient.prototype.verifyMediaOnSources =  function(id){
 
 DashClient.prototype.getMediaData = function(callback){
   var self = this;
-  var url = "/dash/youtube/data/"+this.videoID;
+  var url = this.manifestUrl;
   $.ajax({
     datatype: 'application/json',
     url: url,

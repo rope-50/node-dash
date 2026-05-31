@@ -1,13 +1,32 @@
 {
   "name": "node-dash",
-  "version": "0.0.1",
-  "dependencies": {
-    "express": "3.x.x",
-    "ejs": ">= 0.0.0",
-    "ejs-locals": ">= 0.0.0"
-  },
+  "version": "1.0.0",
+  "description": "A from-scratch MPEG-DASH video player: a custom Media Source Extensions client plus a small Node/Express server that serves and proxies DASH streams.",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "start" : "node app.js",
-    "preinstall": "npm install ./node-dash "
+    "start": "node server.js",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "mpeg-dash",
+    "dash",
+    "media-source-extensions",
+    "mse",
+    "video",
+    "streaming",
+    "express"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.7"
   }
 }
