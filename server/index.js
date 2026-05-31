@@ -1,5 +1,5 @@
 /**
- * Node Dash server.
+ * Dash Player server.
  *
  * Exposes the two endpoints the browser client uses and serves the client:
  *   GET      /dash/manifest?src=<mpd>  -> normalized representation list (JSON)
@@ -82,5 +82,5 @@ if (PROD) {
 }
 
 app.listen(PORT, () => {
-  console.log(`Node Dash running on http://localhost:${PORT} (${PROD ? 'prod' : 'dev'})`);
+  console.log(`Dash Player running on http://localhost:${PORT} (${PROD ? 'prod' : 'dev'})`);
 });

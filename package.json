@@ -1,5 +1,5 @@
 {
-  "name": "node-dash",
+  "name": "dash-player",
   "version": "2.0.0",
   "description": "A from-scratch MPEG-DASH video player: a custom Media Source Extensions client in vanilla JS, plus a small Node/Express server that serves and proxies DASH streams.",
   "type": "module",
