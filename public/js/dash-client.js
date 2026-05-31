@@ -736,7 +736,7 @@ DashClient.prototype.buildHTML = function(container){
     this.compatible = true;
   }
   else{
-    $(el).html('Este navegador no es compatible con la reproducción de videos de Merken.');
+    $(el).html('This browser does not support Media Source Extensions playback.');
     this.compatible = false
   }
   this.el = el;
@@ -755,7 +755,7 @@ DashClient.prototype.init = function(){
           self.buildSequence();
           self.ticks = self.ticks.concat(ticks.map(  function(t){return Math.round( t*videoChunks[0]  )}  )).sort();
           self.getSidxs(function(){
-            console.log('Preparing Media Sources for dashMerken');
+            console.log('Preparing media sources');
             self.msVideo = new MediaSource();
             self.video.src  = window.URL.createObjectURL( self.msVideo);
             self.msVideo.addEventListener('sourceopen', function(){ self.startBufferDownload.call(self, this, 'video'); });           
