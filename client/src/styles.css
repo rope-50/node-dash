@@ -1,0 +1,137 @@
+:root {
+  --accent: #2780e3;
+  --bg: #0f1117;
+  --fg: #e8e8ea;
+  --panel: rgba(0, 0, 0, 0.65);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+#app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0 0 4px;
+}
+
+#status {
+  margin: 0 0 16px;
+  color: #9aa0aa;
+  font-size: 0.95rem;
+}
+
+/* Player */
+.player {
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.player video {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  background: #000;
+}
+
+/* Overlay with media information */
+.player .info {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #fff;
+  background: var(--panel);
+  border-bottom-right-radius: 6px;
+  pointer-events: none;
+}
+
+.player .info span {
+  display: block;
+}
+
+/* Buffering bar across the top */
+.player .loading-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.15);
+  display: none;
+}
+
+.player .loading-bar.active {
+  display: block;
+}
+
+.player .loading-bar > span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 80ms linear;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #15171f;
+}
+
+.controls .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.controls .btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.controls .btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.controls .seek {
+  flex: 1;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.controls .time {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  color: #c7ccd4;
+  min-width: 48px;
+  text-align: center;
+}

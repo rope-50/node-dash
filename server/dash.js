@@ -1,7 +1,7 @@
 /**
  * DASH manifest handling.
  *
- * Fetches an MPEG-DASH manifest (MPD), and flattens its representations into the
+ * Fetches an MPEG-DASH manifest (MPD) and flattens its representations into the
  * compact JSON shape the browser client expects, while:
  *   - routing every media URL through our same-origin proxy (avoids CORS),
  *   - resolving relative `BaseURL`s against the manifest URL,
@@ -96,35 +96,4 @@ export function normalizeManifest(mpd, srcUrl) {
   }
 
   return representations;
-}
-
-/**
- * Builds a default playback descriptor for the player from a representation list:
- * play the lowest-quality video, switching to a higher one halfway through to
- * showcase the adaptive-quality UI, with a single audio track.
- *
- * @param {string} manifestSrc - Original manifest URL.
- * @param {Array<object>} reps - Output of {@link normalizeManifest}.
- * @returns {object|null} Descriptor consumed by `DashClient`, or null if unusable.
- */
-export function buildVideoData(manifestSrc, reps) {
-  const videos = reps.filter((rep) => rep.$.width);
-  const audios = reps.filter((rep) => !rep.$.width);
-  if (videos.length === 0 || audios.length === 0) return null;
-
-  const lowId = videos[0].$.id;
-  const highId = (videos[1] ?? videos[0]).$.id;
-  const audioId = audios[0].$.id;
-
-  // 12 sub-segments: 6 low quality, then 6 at a higher quality (a cosmetic
-  // "quality jump" like YouTube). Audio stays on one track the whole time.
-  const sequence = [...Array(6).fill(lowId), ...Array(6).fill(highId)].join(';');
-  const audioSequence = Array(12).fill(audioId).join(';');
-
-  return {
-    manifest: `/dash/manifest?src=${encodeURIComponent(manifestSrc)}`,
-    sequence,
-    audio_sequence: audioSequence,
-    video_length: 24,
-  };
 }

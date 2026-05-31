@@ -1,12 +1,15 @@
 /**
  * Node Dash server.
  *
- * Serves the player page and exposes two endpoints the browser client uses:
- *   GET /dash/manifest?src=<mpd>  -> normalized representation list (JSON)
- *   GET|HEAD /dash/proxy?url=<u>  -> range-aware, allowlisted media proxy
+ * Exposes the two endpoints the browser client uses and serves the client:
+ *   GET      /dash/manifest?src=<mpd>  -> normalized representation list (JSON)
+ *   GET|HEAD /dash/proxy?url=<u>       -> range-aware, allowlisted media proxy
  *
  * The proxy lets the browser fetch media through our own origin (no CORS) and is
  * restricted to ALLOWED_HOSTS so it cannot be abused as an open relay.
+ *
+ * In development the client is served by Vite in middleware mode (one process,
+ * HMR). In production (`--prod`) the prebuilt `dist/` is served statically.
  */
 
 import express from 'express';
@@ -14,30 +17,15 @@ import { Readable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-import { DEFAULT_MANIFEST } from './src/config.js';
-import { fetchManifest, normalizeManifest, buildVideoData, isAllowedUrl } from './src/dash.js';
+import { DEFAULT_MANIFEST } from './config.js';
+import { fetchManifest, normalizeManifest, isAllowedUrl } from './dash.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, '..');
 const PORT = process.env.PORT || 3000;
+const PROD = process.argv.includes('--prod');
 
 const app = express();
-app.set('views', join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-app.use(express.static(join(__dirname, 'public')));
-
-// Home page: prepare a default playback descriptor and render the player.
-app.get('/', async (req, res) => {
-  const manifestSrc = typeof req.query.src === 'string' ? req.query.src : DEFAULT_MANIFEST;
-  let videoData = null;
-  try {
-    if (!isAllowedUrl(manifestSrc)) throw new Error('manifest host not allowed');
-    const reps = normalizeManifest(await fetchManifest(manifestSrc), manifestSrc);
-    videoData = buildVideoData(manifestSrc, reps);
-  } catch (err) {
-    console.error('Could not prepare manifest:', err.message);
-  }
-  res.render('index', { videoData });
-});
 
 // Representation list consumed by the client.
 app.get('/dash/manifest', async (req, res) => {
@@ -46,8 +34,7 @@ app.get('/dash/manifest', async (req, res) => {
     return res.status(400).json({ error: 'manifest host not allowed' });
   }
   try {
-    const reps = normalizeManifest(await fetchManifest(src), src);
-    res.json(reps);
+    res.json(normalizeManifest(await fetchManifest(src), src));
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
@@ -73,7 +60,6 @@ async function proxyMedia(req, res) {
     if (req.method === 'HEAD' || !upstream.body) {
       return res.end();
     }
-    // Stream the upstream body straight to the client.
     Readable.fromWeb(upstream.body).pipe(res);
   } catch {
     res.status(502).send('upstream error');
@@ -82,8 +68,19 @@ async function proxyMedia(req, res) {
 app.get('/dash/proxy', proxyMedia);
 app.head('/dash/proxy', proxyMedia);
 
-app.listen(PORT, () => {
-  console.log(`Node Dash running on http://localhost:${PORT}`);
-});
+// Serve the client: built assets in production, Vite middleware in development.
+if (PROD) {
+  app.use(express.static(join(ROOT, 'dist')));
+} else {
+  const { createServer } = await import('vite');
+  const vite = await createServer({
+    root: join(ROOT, 'client'),
+    server: { middlewareMode: true },
+    appType: 'spa',
+  });
+  app.use(vite.middlewares);
+}
 
-export { app };
+app.listen(PORT, () => {
+  console.log(`Node Dash running on http://localhost:${PORT} (${PROD ? 'prod' : 'dev'})`);
+});

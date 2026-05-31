@@ -1,11 +1,13 @@
 {
   "name": "node-dash",
-  "version": "1.0.0",
-  "description": "A from-scratch MPEG-DASH video player: a custom Media Source Extensions client plus a small Node/Express server that serves and proxies DASH streams.",
+  "version": "2.0.0",
+  "description": "A from-scratch MPEG-DASH video player: a custom Media Source Extensions client in vanilla JS, plus a small Node/Express server that serves and proxies DASH streams.",
   "type": "module",
-  "main": "server.js",
+  "main": "server/index.js",
   "scripts": {
-    "start": "node server.js",
+    "dev": "node server/index.js",
+    "build": "vite build",
+    "start": "node server/index.js --prod",
     "test": "vitest run"
   },
   "keywords": [
@@ -15,18 +17,19 @@
     "mse",
     "video",
     "streaming",
-    "express"
+    "express",
+    "vite"
   ],
   "license": "MIT",
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
-    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
+    "vite": "^6.3.6",
     "vitest": "^4.1.7"
   }
 }

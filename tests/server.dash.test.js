@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeManifest, buildVideoData, isAllowedUrl } from '../src/dash.js';
+import { normalizeManifest, isAllowedUrl } from '../server/dash.js';
 
 const SRC = 'https://dash.akamaized.net/dash264/TestCases/2a/qualcomm/1/MultiResMPEG2.mpd';
 
@@ -87,26 +87,5 @@ describe('normalizeManifest', () => {
       MPD: { Period: [{ AdaptationSet: [{ Representation: [{ $: { id: 'x' }, SegmentBase: [{ $: {} }] }] }] }] },
     };
     expect(normalizeManifest(noIndex, SRC)).toEqual([]);
-  });
-});
-
-describe('buildVideoData', () => {
-  const reps = normalizeManifest(PARSED_MPD, SRC);
-  const videoData = buildVideoData(SRC, reps);
-
-  it('points the client at the manifest endpoint', () => {
-    expect(videoData.manifest).toBe(`/dash/manifest?src=${encodeURIComponent(SRC)}`);
-  });
-
-  it('builds a 12-segment sequence that jumps to a higher quality halfway', () => {
-    expect(videoData.sequence.split(';')).toEqual(
-      ['1', '1', '1', '1', '1', '1', '3', '3', '3', '3', '3', '3'],
-    );
-    expect(videoData.audio_sequence.split(';')).toEqual(Array(12).fill('4'));
-  });
-
-  it('returns null when there is no video or no audio', () => {
-    const onlyVideo = reps.filter((r) => r.$.width);
-    expect(buildVideoData(SRC, onlyVideo)).toBeNull();
   });
 });

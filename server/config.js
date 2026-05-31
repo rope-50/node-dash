@@ -6,7 +6,7 @@
  * byte-range requests). The default below is a public DASH-IF test vector.
  */
 
-// Default manifest rendered on the home page.
+// Default manifest used when the client requests /dash/manifest with no src.
 export const DEFAULT_MANIFEST =
   'https://dash.akamaized.net/dash264/TestCases/2a/qualcomm/1/MultiResMPEG2.mpd';
 
